@@ -149,7 +149,7 @@ class Evaluator:
                     
                 rouge_res = self.rouge.compute(predictions=[pred], references=[reference])
                 # rouge_res['rouge1'] is a Score object with mid, low, high. Use mid.fmeasure
-                row_res[f'{name}_R1'] = rouge_res['rouge1'].mid.fmeasure
+                row_res[f'{name}_R1'] = rouge_res['rouge1']
                 
                 # BERTScore is slow, maybe skip for single run or do it if requested
                 # if self.bert_score_fn:

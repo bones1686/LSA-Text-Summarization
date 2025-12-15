@@ -1,0 +1,88 @@
+// Text Summarization Evaluation Pipeline Pseudo Code
+
+START Pipeline
+
+    // 1. Initialization Phase
+    INITIALIZE Evaluator(n_samples)
+        LOAD "rouge" metric
+        TRY LOAD "bert_score" (Optional)
+        
+        // Setup Baseline (TextRank)
+        LOAD Spacy model "en_core_web_sm"
+        ADD "textrank" to Spacy pipeline
+        
+        // Setup SOTA (State of the Art) Model
+        TRY LOAD HuggingFace summarization pipeline (model="distilbart-cnn-12-6")
+        
+        // Setup Custom LSA Summarizer
+        INSTANTIATE LSASummarizer()
+
+    // 2. Data Loading Phase
+    FUNCTION evaluate()
+        INITIALIZE DataLoader(split="test")
+        LOAD dataset INTO dataframe (limit by n_samples)
+        
+        INITIALIZE results_list as EMPTY
+
+        // 3. Main Processing Loop
+        FOR EACH row IN dataframe:
+            GET document_text from row
+            GET reference_summary from row
+            
+            PRINT "Processing sample..."
+
+            // --- Generate Summaries using 4 Methods ---
+
+            // Method A: Baseline (TextRank)
+            FUNCTION get_baseline_summary(text):
+                PROCESS text with Spacy NLP pipeline
+                EXTRACT top sentences using TextRank
+                RETURN joined sentences
+
+            // Method B: Sklearn LSA (Standard Implementation)
+            FUNCTION get_sklearn_lsa_summary(text):
+                PREPROCESS text (tokenize, clean)
+                IF text is empty RETURN ""
+                
+                CREATE TF-IDF matrix from sentences
+                PERFORM TruncatedSVD on matrix
+                GET first singular component (dominant topic)
+                RANK sentences by score in first component
+                SELECT top n sentences
+                RETURN joined sentences
+
+            // Method C: Custom LSA (The Core Project Logic)
+            FUNCTION custom_summarizer.summarize(text):
+                // (Internal logic of LSASummarizer)
+                PREPROCESS text
+                BUILD Term-Document Matrix
+                DECOMPOSE matrix using Custom Lanczos SVD
+                SELECT sentences using Rank Selection & MMR
+                RETURN summary
+
+            // Method D: SOTA (DistilBART)
+            FUNCTION get_sota_summary(text):
+                TRUNCATE text to model limit (e.g., 4096 chars)
+                PASS to Transformer Model
+                RETURN generated summary text
+
+            // --- Evaluation ---
+            
+            CALCULATE scores for each method:
+                FOR method in [Baseline, Sklearn, Custom, SOTA]:
+                    IF summary is generated:
+                        COMPUTE ROUGE-1 score against reference_summary
+                        (Optional) COMPUTE BERTScore
+                    ELSE:
+                        SET score = 0
+            
+            APPEND scores to results_list
+
+        // 4. Aggregation and Output
+        CONVERT results_list to DataFrame
+        CALCULATE mean scores (ROUGE-1 F1) across all samples
+        PRINT mean scores
+        SAVE results DataFrame to "evaluation_results.csv"
+
+END Pipeline
+

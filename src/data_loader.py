@@ -17,7 +17,8 @@ class DataLoader:
         """
         print(f"Loading {self.dataset_name} dataset ({self.split} split)...")
         try:
-            self.dataset = load_dataset(self.dataset_name, split=self.split)
+            # Added trust_remote_code=True to fix the error
+            self.dataset = load_dataset(self.dataset_name, split=self.split, trust_remote_code=True)
             
             if n_samples:
                 self.dataset = self.dataset.select(range(min(n_samples, len(self.dataset))))
