@@ -1,0 +1,14 @@
+numpy
+scipy
+scikit-learn
+nltk
+spacy
+pandas
+matplotlib
+rouge-score
+bert-score
+datasets
+torch
+transformers
+openpyxl
+pytextrank
